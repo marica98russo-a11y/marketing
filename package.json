@@ -1,0 +1,10 @@
+{
+  "name": "marketing-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Marketing Lab - sito statico multipagina",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  },
+  "engines": { "node": ">=22" }
+}
