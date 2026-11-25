@@ -1,0 +1,10 @@
+Marketing Lab - Solo aggiornamento WhatsApp
+
+Animazione home invariata.
+Tutti i moduli aprono WhatsApp sul numero +39 349 365 2160 con messaggio precompilato. Il visitatore deve premere Invia in WhatsApp.
+Il campo email e sostituito dal telefono facoltativo. Non viene piu usato Web3Forms.
+
+Sostituisci i file del progetto locale con questi, senza eliminare .git.
+Esegui npm run build, poi git add . e git commit e git push.
+Vercel: Other, build npm run build, output dist.
+L’informativa privacy e aggiornata nel funzionamento ma resta da completare con i dati del titolare.

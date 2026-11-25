@@ -2,39 +2,27 @@ const toggle=document.querySelector('.menu-toggle');const menu=document.querySel
 const sectorLabels={weblab:'Weblab — digitale',eventlab:'Eventlab — eventi',businesslab:'Businesslab — corsi',orientamento:'Da definire insieme'};
 const params=new URLSearchParams(location.search);const sector=params.get('lab');if(document.querySelector('#laboratorio')&&Object.hasOwn(sectorLabels,sector??''))document.querySelector('#laboratorio').value=sector;
 function updateFields(form){const value=form.querySelector('[name=laboratorio]')?.value||form.dataset.lab;form.querySelectorAll('[data-for]').forEach(group=>{const show=group.dataset.for===value;group.hidden=!show;group.querySelectorAll('input,textarea,select').forEach(field=>field.disabled=!show);});}
+const whatsappNumber='393493652160';
 document.querySelectorAll('.brief').forEach(form=>{
  updateFields(form);
  form.querySelector('[name=laboratorio]')?.addEventListener('change',()=>updateFields(form));
- form.addEventListener('submit',async event=>{
+ form.addEventListener('submit',event=>{
   event.preventDefault();
-  const button=form.querySelector('button[type=submit]');
-  if(button.disabled || !form.reportValidity())return;
+  if(!form.reportValidity())return;
   const values=new FormData(form);
-  if(values.get('botcheck'))return;
   const lab=values.get('laboratorio')||form.dataset.lab;
-  const label=sectorLabels[lab]||sectorLabels.orientamento;
-  const payload=Object.fromEntries(values);
-  delete payload.botcheck;
-  payload.subject='Marketing Lab · Nuova richiesta · '+label;
-  payload.from_name='Marketing Lab';
-  payload.name=String(values.get('nome')||'').trim();
-  payload.replyto=String(values.get('email')||'').trim();
-  payload.laboratorio=label;
-  payload.pagina=location.origin+location.pathname;
-  const status=form.querySelector('.status');
-  const original=button.textContent;
-  button.disabled=true;button.textContent='Invio in corso…';form.setAttribute('aria-busy','true');
-  status.textContent='Stiamo inviando la tua richiesta…';
-  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),20000);
-  try{
-   const response=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload),signal:controller.signal});
-   const result=await response.json();
-   if(!response.ok || result.success!==true)throw new Error('Invio non confermato');
-   status.textContent='Grazie! La tua richiesta è stata inviata. Ti risponderemo alla tua email.';
-   form.reset();updateFields(form);
-  }catch(error){
-   status.textContent=error.name==='AbortError'?'Non abbiamo ricevuto conferma dell’invio. I dati sono ancora qui: attendi prima di riprovare per evitare richieste duplicate.':'Invio non confermato. I dati sono ancora qui: controlla la connessione e riprova.';
-  }finally{clearTimeout(timeout);button.disabled=false;button.textContent=original;form.removeAttribute('aria-busy');}
+  const labels={nome:'Nome',telefono:'Telefono',attivita:'Attività / professione',idea:'La mia idea',budget:'Budget indicativo',evento:'Tipo di evento',data:'Data indicativa',ospiti:'Numero di ospiti',citta:'Città',social:'Canali social',pubblico:'A chi vorrei insegnare'};
+  const lines=['Ciao Marketing Lab!','Vorrei informazioni su: '+(sectorLabels[lab]||sectorLabels.orientamento),''];
+  for(const [key,value] of values){if(labels[key] && String(value).trim())lines.push(labels[key]+': '+String(value).trim());}
+  const message=lines.join('\n');
+  const url='https://wa.me/'+whatsappNumber+'?text='+encodeURIComponent(message);
+  const output=form.querySelector('.output');
+  output.hidden=false;output.querySelector('textarea').value=message;
+  let link=output.querySelector('.whatsapp-fallback');
+  if(!link){link=document.createElement('a');link.className='pill primary whatsapp-fallback';link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri WhatsApp';output.prepend(link);}
+  link.href=url;
+  form.querySelector('.status').textContent='Messaggio pronto: premi Invia in WhatsApp per confermare. Se non si apre, usa il pulsante qui sotto.';
+  window.open(url,'_blank','noopener,noreferrer');
  });
 });
 document.querySelectorAll('.filter').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));const filter=button.dataset.filter;let count=0;document.querySelectorAll('.project-card').forEach(card=>{card.hidden=filter!=='tutti'&&card.dataset.lab!==filter;if(!card.hidden)count++;});document.querySelector('#project-status').textContent=count+' esempi di progetto visibili';}));
